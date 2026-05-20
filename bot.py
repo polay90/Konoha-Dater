@@ -6,7 +6,6 @@ API_TOKEN = '8783235583:AAFWQGfIW9a8ob2VJ1fm01_Ahr4fJ1OiXSw'
 bot = telebot.TeleBot(API_TOKEN)
 
 # Database sederhana di memori (Jika bot restart, saldo akan kembali ke 0)
-# Untuk produksi, disarankan menggunakan database asli seperti SQLite atau PostgreSQL
 user_balances = {}
 
 # Daftar Menu, Harga, dan Deskripsi Input
@@ -56,14 +55,28 @@ def send_welcome(message):
 def callback_query(call):
     user_id = call.from_user.id
     
+    # Perbaikan 1: Amankan answer_callback_query di awal agar tidak timeout/error 400
+    try:
+        if call.data != "cek_saldo":
+            bot.answer_callback_query(call.id)
+    except Exception:
+        pass
+
     if call.data.startswith("menu_"):
-        menu_key = call.data.split("_")[1]
-        menu = MENU_DATA[menu_key]
+        # Menggunakan maxsplit=1 agar key seperti 'riset_akun' atau 'riset_kode' tidak terpotong menjadi 'riset' saja
+        menu_key = call.data.split("_", 1)[1]
+        
+        # Perbaikan 2: Antisipasi KeyError menggunakan .get()
+        menu = MENU_DATA.get(menu_key)
+        
+        if not menu:
+            bot.send_message(call.message.chat.id, f"❌ Menu `{menu_key}` tidak ditemukan atau sedang dinonaktifkan.")
+            return
+            
         saldo_sekarang = get_balance(user_id)
         
         # Proteksi Saldo
         if saldo_sekarang < menu['harga']:
-            bot.answer_callback_query(call.id, "❌ Saldo Anda tidak mencukupi!")
             bot.send_message(
                 call.message.chat.id, 
                 f"⚠️ Gagal mengakses *{menu['nama']}*.\n"
@@ -73,7 +86,6 @@ def callback_query(call):
                 parse_mode="Markdown"
             )
         else:
-            bot.answer_callback_query(call.id)
             msg = bot.send_message(
                 call.message.chat.id, 
                 f"📝 *{menu['nama']}* (Rp {menu['harga']:,})\n"
@@ -84,8 +96,6 @@ def callback_query(call):
             bot.register_next_step_handler(msg, process_menu_input, menu_key, menu)
             
     elif call.data == "deposit":
-        bot.answer_callback_query(call.id)
-        # Skenario QRIS Statis / Instruksi Deposit
         deposit_text = (
             "🤖 *Menu Deposit / Pembayaran QRIS*\n\n"
             "1. Silakan lakukan transfer ke QRIS berikut [https://photos.app.goo.gl/4Np9w46FNC6kUfeB6]\n"
@@ -96,16 +106,25 @@ def callback_query(call):
         bot.send_message(call.message.chat.id, deposit_text, parse_mode="Markdown")
         
     elif call.data == "cek_saldo":
-        bot.answer_callback_query(call.id, f"Saldo Anda: Rp {get_balance(user_id):,}", show_alert=True)
+        # Cek saldo menggunakan show_alert=True agar muncul pop-up notifikasi di Telegram
+        try:
+            bot.answer_callback_query(call.id, f"Saldo Anda: Rp {get_balance(user_id):,}", show_alert=True)
+        except Exception:
+            bot.send_message(call.message.chat.id, f"💰 Saldo Anda saat ini: Rp {get_balance(user_id):,}")
 
 # Memproses Input Setelah Memilih Menu dan Saldo Cukup
 def process_menu_input(message, menu_key, menu):
     user_id = message.from_user.id
     user_input = message.text
     
+    # Validasi pembatalan jika user mengetik command lain
+    if user_input and user_input.startswith('/'):
+        bot.reply_to(message, "🔄 Proses input dibatalkan karena Anda mengetik perintah baru.")
+        return
+
     # Validasi khusus untuk menu Ternak Wilayah (Harus 11 digit nomor)
     if menu_key == "ternak":
-        if not user_input.isdigit() or len(user_input) != 11:
+        if not user_input or not user_input.isdigit() or len(user_input) != 11:
             msg = bot.reply_to(message, "❌ Input tidak valid! Nomor KPJ harus berupa *11 digit angka*. Silakan ulangi:")
             bot.register_next_step_handler(msg, process_menu_input, menu_key, menu)
             return
@@ -125,7 +144,7 @@ def process_menu_input(message, menu_key, menu):
     )
     bot.send_message(message.chat.id, sukses_text, parse_mode="Markdown", reply_markup=main_keyboard(user_id))
 
-# FITUR TAMBAHAN: Perintah Rahasia untuk Simulasi Isi Saldo Mandiri
+# Perintah Isi Saldo Mandiri (Simulasi)
 @bot.message_handler(commands=['topup'])
 def simulasi_topup(message):
     user_id = message.from_user.id
@@ -133,11 +152,10 @@ def simulasi_topup(message):
         amount = int(message.text.split()[1])
         user_balances[user_id] = user_balances.get(user_id, 0) + amount
         bot.reply_to(message, f"💰 Berhasil simulasi deposit! Saldo Anda saat ini: *Rp {user_balances[user_id]:,}*", parse_mode="Markdown", reply_markup=main_keyboard(user_id))
-    except:
+    except Exception:
         bot.reply_to(message, "Format salah. Gunakan contoh: `/topup 500000`")
 
 # Menjalankan Bot
 if __name__ == '__main__':
     print("Bot sedang berjalan...")
     bot.infinity_polling()
-  

@@ -11,10 +11,10 @@ user_balances = {}
 # Daftar Menu, Harga, dan Deskripsi Input
 MENU_DATA = {
     "lacak": {"nama": "Lacak Peserta Jamsostek", "harga": 100000, "input": "NIK peserta"},
-    "simbo": {"nama": "Generate Simbo Kode Plus", "harga": 250000, "input": "simbol JHT (contoh: AG, BB, DF, KO, PT)"},
+    "simbo": {"nama": "Generate Simbol Kode Plus", "harga": 250000, "input": "simbol JHT (contoh: AG, BB, DF, KO, PT)"},
     "riset_akun": {"nama": "Riset Akun", "harga": 300000, "input": "KTP / KPJ / Nama Ibu Kandung"},
     "riset_kode": {"nama": "Riset Kode Numeric", "harga": 450000, "input": "Paklaring / KPJ"},
-    "bongkar": {"nama": "Bongkar Akun", "harga": 10000, "input": "KPJ / NIK / Nama"},
+    "bongkar": {"nama": "Bongkar Akun", "harga": 250000, "input": "KPJ / NIK / Nama"},
     "ternak": {"nama": "Ternak Wilayah Request", "harga": 250000, "input": "11 digit Nomor KPJ random"},
 }
 
@@ -101,7 +101,7 @@ def callback_query(call):
             "1. Silakan lakukan transfer ke QRIS berikut [https://photos.app.goo.gl/4Np9w46FNC6kUfeB6]\n"
             "2. Kirimkan bukti transfer ke Admin (@play2026).\n"
             "3. Saldo akan ditambahkan manual oleh admin atau via sistem terintegrasi.\n\n"
-            "_*Untuk simulasi trial/testing bot ini, ketik perintah `/topup 500000` untuk mengisi saldo instan._"
+            "_*Untuk lanjut hubungi admin, ketik perintah `@play2026` untuk mengisi saldo instan._"
         )
         bot.send_message(call.message.chat.id, deposit_text, parse_mode="Markdown")
         

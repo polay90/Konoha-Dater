@@ -140,7 +140,7 @@ def process_menu_input(message, menu_key, menu):
         f" INPUT DATA: `{user_input}`\n"
         f"💸 BIAYA: Rp {menu['harga']:,}\n"
         f"💰 SISA SALDO: Rp {saldo_sisa:,}\n\n"
-        f"Proses sedang dijalankan oleh sistem. Mohon tunggu informasi berikutnya."
+        f"Proses sedang dijalankan oleh sistem. Memakan waktu 15 menit sd 6 jam."
     )
     bot.send_message(message.chat.id, sukses_text, parse_mode="Markdown", reply_markup=main_keyboard(user_id))
 

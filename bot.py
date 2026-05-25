@@ -10,7 +10,7 @@ user_balances = {}
 
 # Daftar Menu, Harga, dan Deskripsi Input
 MENU_DATA = {
-    "lacak": {"nama": "Lacak Peserta Jamsostek", "harga": 100000, "input": "NIK peserta"},
+    "lacak": {"nama": "Lacak Peserta Jamsostek", "harga": 350000, "input": "NIK peserta"},
     "simbo": {"nama": "Generate Simbol Kode Plus", "harga": 250000, "input": "simbol JHT (contoh: AG, BB, DF, KO, PT)"},
     "riset_akun": {"nama": "Riset Akun", "harga": 300000, "input": "KTP / KPJ / Nama Ibu Kandung"},
     "riset_kode": {"nama": "Riset Kode Numeric", "harga": 450000, "input": "Paklaring / KPJ"},
@@ -98,7 +98,7 @@ def callback_query(call):
     elif call.data == "deposit":
         deposit_text = (
             "🤖 *Menu Deposit / Pembayaran QRIS*\n\n"
-            "1. Silakan lakukan transfer ke QRIS berikut [https://photos.app.goo.gl/vhzEcBCLJkc9g3Ad7]\n"
+            "1. Silakan lakukan transfer ke QRIS berikut [@play2026]\n"
             "2. Kirimkan bukti transfer ke Admin (@play2026).\n"
             "3. Saldo akan ditambahkan manual oleh admin atau via sistem terintegrasi.\n\n"
             "_*Untuk lanjut hubungi admin, ketik perintah `@play2026` untuk mengisi saldo instan._"
